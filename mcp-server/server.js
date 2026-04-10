@@ -26,6 +26,7 @@ import { execFile as execFileCb } from 'node:child_process';
 import process from 'node:process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { realpathSync } from 'node:fs';
 
 const execFile = promisify(execFileCb);
 
@@ -795,7 +796,7 @@ server.registerTool(
 
 const isMain =
   typeof process !== 'undefined' &&
-  process.argv[1] === fileURLToPath(import.meta.url);
+  realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
 
 if (isMain) {
   const transport = new StdioServerTransport();
