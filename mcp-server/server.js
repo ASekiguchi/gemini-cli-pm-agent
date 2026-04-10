@@ -595,11 +595,7 @@ server.registerTool(
     // array per page (one line per page). We merge them in JS.
     const raw = await runGh([
       'api',
-      `repos/${owner}/${repo}/commits`,
-      '-f',
-      `since=${since}`,
-      '-f',
-      'per_page=100',
+      `repos/${owner}/${repo}/commits?since=${since}&per_page=100`,
       '--paginate',
       '--jq',
       '[.[].commit.author.date]',
@@ -724,17 +720,12 @@ server.registerTool(
     );
 
     // Commit velocity: GitHub Commits API, not local git.
+    // Note: gh api -f sends params as POST body; for GET endpoints the params
+    // must be embedded in the URL as a query string.
     const commitArgs = (since, until) => {
-      const args = [
-        'api',
-        `repos/${repoSlug}/commits`,
-        '-f',
-        `since=${since}T00:00:00Z`,
-        '-f',
-        'per_page=100',
-      ];
-      if (until) args.push('-f', `until=${until}T00:00:00Z`);
-      return args;
+      let url = `repos/${repoSlug}/commits?since=${since}T00:00:00Z&per_page=100`;
+      if (until) url += `&until=${until}T00:00:00Z`;
+      return ['api', url];
     };
 
     const [thisMonth, lastMonth, contributorCount] = await Promise.all([
