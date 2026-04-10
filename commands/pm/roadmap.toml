@@ -1,43 +1,42 @@
-description = "Generate or update a product roadmap from project activity"
+description = "Generate a product roadmap — usage: /pm:roadmap owner/repo"
 
 prompt = """
-Generate a product roadmap based on current project activity.
+Generate a product roadmap for the repository specified in the arguments.
 
-## Data Sources
+## Arguments
+{{args}}
 
-Open issues by label: !{gh issue list --state open --limit 100 --json number,title,labels,reactionGroups,comments}
-Recent merged PRs: !{gh pr list --state merged --limit 30 --json number,title,labels,mergedAt}
-Commit velocity: !{git log --oneline --since="3 months ago" | wc -l} commits in 3 months
-Active contributors: !{git log --since="1 month ago" --format="%aN" | sort -u}
+Parse the argument as "owner/repo" (e.g. "google-gemini/gemini-cli").
+Extract owner and repo from it.
 
 ## Instructions
 
-1. Group issues into strategic themes (core features, DX, performance, ecosystem, docs)
-2. Estimate effort for each theme based on issue count and complexity
+Call the following MCP tools:
+1. `analyze_project_issues` with owner, repo, limit=100, state="open"
+2. `analyze_commit_velocity` with owner, repo, months=3
+
+Then generate a Now/Next/Later roadmap:
+
+### Roadmap — [repo name]
+
+1. Group open issues into strategic themes (core features, DX, performance, ecosystem, docs)
+2. Use reactionCount and commentCount as proxies for user demand
 3. Use commit velocity to calibrate timeline estimates
-4. Produce a Now/Next/Later/Exploring roadmap
 
-## Output Format
+#### Now (In Progress / Next Sprint)
+High-demand items with active discussion.
 
-### Roadmap — [Project Name]
-Generated: [today's date] | Velocity: [N] commits/month
-
-#### Now (In Progress)
-Items with active PRs or recent commits.
-
-#### Next (1-2 months)
+#### Next (1–2 months)
 High-priority items with clear requirements.
 
-#### Later (3-6 months)
+#### Later (3–6 months)
 Important but needs more planning or resources.
 
 #### Exploring
 Ideas under discussion, needs community input.
 
 Present each section as a table:
-| Theme | Item | Issue(s) | Effort | Rationale |
+| Theme | Issue(s) | Demand signal | Effort estimate | Rationale |
 
-End with alignment notes if a ROADMAP.md exists in the project.
-
-{{args}}
+End with a note on confidence level given the data available.
 """

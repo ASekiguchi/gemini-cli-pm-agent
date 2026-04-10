@@ -1,44 +1,36 @@
-description = "Quick project health check with key metrics"
+description = "Quick project health check — usage: /pm:health owner/repo"
 
 prompt = """
-Run a project health check and produce a scorecard.
+Run a project health check for the repository specified in the arguments.
 
-## Data Sources
+## Arguments
+{{args}}
 
-Issue metrics:
-- Open issues: !{gh issue list --state open --json id --jq length}
-- Closed last 30 days: !{gh issue list --state closed --limit 100 --json closedAt --jq '[.[] | select(.closedAt > (now - 2592000 | strftime("%Y-%m-%dT%H:%M:%SZ")))] | length'}
-- Recent issue activity: !{gh issue list --limit 10 --state open --json number,title,comments,reactionGroups,createdAt}
+Parse the argument as "owner/repo" (e.g. "google-gemini/gemini-cli").
+Extract owner and repo from it.
 
-PR metrics:
-- Open PRs: !{gh pr list --state open --json id --jq length}
-- Merged last 30 days: !{gh pr list --state merged --limit 100 --json mergedAt --jq '[.[] | select(.mergedAt > (now - 2592000 | strftime("%Y-%m-%dT%H:%M:%SZ")))] | length'}
+## Instructions
 
-Commit activity:
-- This month: !{git log --oneline --since="1 month ago" | wc -l} commits
-- Last month: !{git log --oneline --since="2 months ago" --until="1 month ago" | wc -l} commits
-- Contributors this month: !{git log --since="1 month ago" --format="%aN" | sort -u | wc -l}
+Call the `check_project_health` MCP tool with the extracted owner and repo.
 
-## Output Format
-
-Produce a health scorecard:
+Then produce a health scorecard:
 
 ### Project Health Scorecard
 
-| Metric | Value | Trend | Status |
-|--------|-------|-------|--------|
-| Open Issues | N | ... | OK/Warning/Critical |
-| Issue Close Rate | N/month | ... | ... |
-| Open PRs | N | ... | ... |
-| PR Merge Rate | N/month | ... | ... |
-| Commit Velocity | N/month | ... | ... |
-| Active Contributors | N | ... | ... |
+| Metric | Value | Status |
+|--------|-------|--------|
+| Open Issues | N | OK / Warning / Critical |
+| Issues Closed (30d) | N | ... |
+| Open PRs | N | ... |
+| PRs Merged (30d) | N | ... |
+| Commit Velocity | trend | ... |
+| Active Contributors | N | ... |
 
 ### Risk Flags
-List any concerns (stale issues, declining velocity, etc.)
+List any riskFlags returned by the tool. If empty, write "None detected."
 
 ### Quick Wins
 3 specific actions that could improve project health immediately.
 
-{{args}}
+If any metrics show as null in the tool response, label them "data unavailable" rather than 0.
 """

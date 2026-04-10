@@ -1,42 +1,45 @@
-description = "Prioritize open issues using RICE scoring framework"
+description = "Prioritize open issues using RICE scoring — usage: /pm:prioritize owner/repo"
 
 prompt = """
-Prioritize the project's open issues using the RICE scoring framework.
+Prioritize open issues for the repository specified in the arguments.
 
-## Data Sources
+## Arguments
+{{args}}
 
-Open issues: !{gh issue list --state open --limit 50 --json number,title,labels,reactionGroups,comments,createdAt}
-Commit velocity: !{git log --oneline --since="1 month ago" | wc -l} commits this month
+Parse the argument as "owner/repo" (e.g. "google-gemini/gemini-cli").
+Extract owner and repo from it.
+
+## Instructions
+
+Call the following MCP tools:
+1. `analyze_project_issues` with owner, repo, limit=50, state="open"
+2. `analyze_commit_velocity` with owner, repo, months=1
+
+Then apply RICE scoring to the issues:
 
 ## RICE Framework
 
 For each issue, estimate:
-- **Reach**: Users affected per month (use reactions + comments as proxy)
+- **Reach**: Users affected per month (use reactionCount + commentCount as proxy)
 - **Impact**: Experience improvement (3=massive, 2=high, 1=medium, 0.5=low, 0.25=minimal)
 - **Confidence**: Estimate confidence (100%=high, 80%=medium, 50%=low)
 - **Effort**: Person-months to implement
 
-**Score** = (Reach x Impact x Confidence) / Effort
+**Score** = (Reach × Impact × Confidence) / Effort
 
 ## Output Format
 
-### RICE Prioritization — [date]
+### RICE Prioritization
 
 | Rank | Issue | Title | Reach | Impact | Confidence | Effort | RICE Score |
 |------|-------|-------|-------|--------|------------|--------|------------|
-| 1 | #N | ... | ... | ... | ... | ... | ... |
 
 ### MoSCoW Classification
-
-Group the scored items into Must/Should/Could/Won't categories.
+Group the top 20 scored items into Must / Should / Could / Won't categories.
 
 ### Recommended Sprint Focus
-
-Based on velocity of [N] commits/month, recommend 3-5 items for the next sprint with rationale.
+Recommend 3–5 items for the next sprint with rationale based on velocity data.
 
 ### Scoring Notes
-
 Briefly explain the reasoning for the top 5 items' scores.
-
-{{args}}
 """
