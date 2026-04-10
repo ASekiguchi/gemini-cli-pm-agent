@@ -343,9 +343,21 @@ const GH_PATH = resolveGhPath();
 export async function runGh(args) {
   let stdout;
   try {
+    const home = process.env.HOME || homedir();
+    const extraPaths = [
+      `${home}/bin`,
+      '/usr/local/bin',
+      '/opt/homebrew/bin',
+      '/usr/bin',
+    ].join(':');
+    const env = {
+      ...process.env,
+      PATH: `${extraPaths}:${process.env.PATH || ''}`,
+    };
     const result = await execFile(GH_PATH, args, {
       timeout: 30_000,
       maxBuffer: 50 * 1024 * 1024,
+      env,
     });
     stdout = result.stdout;
   } catch (error) {
