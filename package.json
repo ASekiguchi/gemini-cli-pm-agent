@@ -1,15 +1,28 @@
 {
   "name": "gemini-cli-pm-agent",
   "version": "1.0.0",
-  "description": "MCP Server for PM Agent Extension — AI-powered Product Management tools",
+  "description": "Standalone Gemini CLI extension for OSS product management workflows",
   "type": "module",
   "main": "mcp-server/server.js",
+  "license": "Apache-2.0",
+  "keywords": [
+    "gemini-cli",
+    "gemini-cli-extension",
+    "mcp",
+    "github",
+    "product-management",
+    "oss"
+  ],
   "engines": {
     "node": ">=18"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/ASekiguchi/gemini-cli-pm-agent.git"
+  },
+  "scripts": {
+    "check": "node --check mcp-server/server.js",
+    "test": "node --test mcp-server/server.test.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.23.0",
