@@ -26,7 +26,8 @@ import { execFile as execFileCb } from 'node:child_process';
 import process from 'node:process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
-import { realpathSync } from 'node:fs';
+import { realpathSync, existsSync } from 'node:fs';
+import { homedir } from 'node:os';
 
 const execFile = promisify(execFileCb);
 
@@ -320,10 +321,29 @@ export function daysAgoISO(days) {
  * @param {string[]} args
  * @returns {Promise<string>}
  */
+/**
+ * Resolve the path to the gh CLI binary.
+ * Falls back to common user-local install locations if not on PATH.
+ */
+function resolveGhPath() {
+  const candidates = [
+    `${homedir()}/bin/gh`,
+    '/usr/local/bin/gh',
+    '/opt/homebrew/bin/gh',
+    '/usr/bin/gh',
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+  return 'gh'; // last resort: rely on PATH
+}
+
+const GH_PATH = resolveGhPath();
+
 export async function runGh(args) {
   let stdout;
   try {
-    const result = await execFile('gh', args, {
+    const result = await execFile(GH_PATH, args, {
       timeout: 30_000,
       maxBuffer: 50 * 1024 * 1024,
     });
@@ -365,11 +385,10 @@ export async function runGh(args) {
  * @returns {Promise<number>}
  */
 async function searchIssueCount(query) {
+  const encoded = encodeURIComponent(query);
   const raw = await runGh([
     'api',
-    'search/issues',
-    '-f',
-    `q=${query}`,
+    `search/issues?q=${encoded}`,
     '--jq',
     '.total_count',
   ]);
@@ -794,9 +813,17 @@ server.registerTool(
 // Entry point — only when run directly; not when imported for tests
 // ---------------------------------------------------------------------------
 
-const isMain =
-  typeof process !== 'undefined' &&
-  realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+const isMain = (() => {
+  try {
+    return (
+      typeof process !== 'undefined' &&
+      Boolean(process.argv[1]) &&
+      realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
+    );
+  } catch {
+    return false;
+  }
+})();
 
 if (isMain) {
   const transport = new StdioServerTransport();
