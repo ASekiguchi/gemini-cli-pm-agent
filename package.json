@@ -1,9 +1,13 @@
 {
-  "name": "pm-agent-mcp-server",
+  "name": "gemini-cli-pm-agent",
   "version": "1.0.0",
   "description": "MCP Server for PM Agent Extension — AI-powered Product Management tools",
   "type": "module",
   "main": "mcp-server/server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ASekiguchi/gemini-cli-pm-agent.git"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.23.0",
     "zod": "^3.22.4"

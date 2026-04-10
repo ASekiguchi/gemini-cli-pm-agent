@@ -30,15 +30,18 @@ implementation of
 ## Installation
 
 ```bash
-# From the gemini-cli repository root (or a local clone of this extension)
-gemini extensions link /path/to/extensions/pm-agent
+# Clone this repository
+git clone https://github.com/ASekiguchi/gemini-cli-pm-agent.git
+
+# Link the extension to Gemini CLI
+gemini extensions link /path/to/gemini-cli-pm-agent
 ```
 
 The MCP server dependencies are installed automatically on first link. If you
 need to install them manually:
 
 ```bash
-cd /path/to/extensions/pm-agent
+cd /path/to/gemini-cli-pm-agent
 npm install
 ```
 
