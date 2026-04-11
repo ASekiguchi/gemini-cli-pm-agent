@@ -1,6 +1,6 @@
 {
   "name": "gemini-cli-pm-agent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Standalone Gemini CLI extension for OSS product management workflows",
   "type": "module",
   "main": "mcp-server/server.js",

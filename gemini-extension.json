@@ -1,12 +1,12 @@
 {
   "name": "pm-agent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI-powered Product Management workflows for OSS projects in Gemini CLI",
   "contextFileName": "GEMINI.md",
   "mcpServers": {
     "pmTools": {
       "command": "node",
-      "args": ["${extensionPath}${/}mcp-server${/}server.js"],
+      "args": ["${extensionPath}${/}mcp-server${/}bootstrap.js"],
       "cwd": "${extensionPath}"
     }
   }

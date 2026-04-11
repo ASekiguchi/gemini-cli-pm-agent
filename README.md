@@ -49,6 +49,10 @@ install MCP server dependencies manually:
 npm install
 ```
 
+The extension includes a small dependency-free bootstrap script that installs
+runtime dependencies with `npm ci --omit=dev` if they are missing during MCP
+server startup.
+
 For gallery discovery, the GitHub repository must be public and include the
 `gemini-cli-extension` topic.
 
@@ -186,6 +190,7 @@ pm-agent/
 ├── GEMINI.md                      # PM context injected into Gemini sessions
 ├── package.json                   # MCP server dependencies
 ├── mcp-server/
+│   ├── bootstrap.js              # Installs runtime deps before MCP startup
 │   ├── server.js                  # MCP server (3 tools, no build step)
 │   └── server.test.js             # Unit tests (node:test)
 ├── skills/
