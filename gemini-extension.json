@@ -1,6 +1,6 @@
 {
   "name": "pm-agent",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "AI-powered Product Management workflows for OSS projects in Gemini CLI",
   "contextFileName": "GEMINI.md",
   "mcpServers": {

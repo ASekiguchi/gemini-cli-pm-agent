@@ -37,17 +37,23 @@ For each issue, estimate:
 **Score** = (Reach x Impact x Confidence) / Effort
 
 RICE scores are heuristic estimates based on issue metadata and model judgment.
-Sort the RICE table by RICE Score in descending numeric order. For ties, sort
-by severity in this order: security, crash/data-loss, reliability, user-facing
-UX, maintenance, documentation. Do not let override candidates break the numeric
-sort order; instead, flag them in MoSCoW and Scoring Notes.
-Before finalizing the response, verify that every row has a RICE Score less
-than or equal to the row above it. If not, reorder the table. Do not add notes
-claiming that non-tied rows were sorted by severity; severity sorting applies
-only to exact numeric ties.
+Use this exact ranking algorithm:
+1. Score all candidate rows first.
+2. Sort rows strictly by numeric RICE Score in descending order.
+3. Assign the Rank column only after sorting.
+4. For exact numeric ties only, sort by severity in this order: security,
+   crash/data-loss, reliability, user-facing UX, maintenance, documentation.
+
+Quality gate: before finalizing, scan the RICE Score column from top to bottom.
+Each row must be less than or equal to the row above it. A sequence such as
+2.8, 2.7, 3.6 is invalid and must be reordered. Never write a note claiming
+that a non-tied row was moved because of severity.
+
 Do not treat them as absolute truth. Low-reach but high-severity security,
 reliability, data-loss, or trust issues may need priority overrides; call those
-out explicitly in MoSCoW and Scoring Notes.
+out explicitly in MoSCoW and Scoring Notes. If you believe an override candidate
+truly deserves a higher rank, adjust Impact, Confidence, or Effort before
+computing the score so the numeric RICE Score supports the rank.
 
 For security-related issues, use cautious language such as "reported",
 "potential", or "requires validation" unless the issue is confirmed by
