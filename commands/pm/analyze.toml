@@ -1,4 +1,4 @@
-description = "Full PM analysis — usage: /pm:analyze owner/repo"
+description = "Full PM analysis - usage: /pm:analyze owner/repo"
 
 prompt = """
 Run a full Product Management analysis for the repository specified in the arguments.
@@ -11,11 +11,21 @@ Extract owner and repo from it.
 
 ## Instructions
 
+Use MCP tools directly. Do not use shell commands.
+
 Call the following MCP tools in order:
 1. `analyze_project_issues` with owner, repo, limit=50, state="open"
 2. `analyze_project_issues` with owner, repo, limit=20, state="closed"
 3. `analyze_commit_velocity` with owner, repo, months=3
 4. `check_project_health` with owner, repo
+
+If the MCP tools return dataErrors, partialData=true, or an error indicating
+that GitHub data could not be fetched, stop the PM analysis. Do not produce
+SWOT, RICE, roadmap, or priority recommendations from unavailable data.
+Instead, produce an "Environment Check Required" response that includes:
+1. the failed metric or tool,
+2. the exact error message if available,
+3. setup steps for `gh auth status`, `gh auth login`, and retrying the command.
 
 Then produce a comprehensive PM analysis:
 
@@ -31,6 +41,22 @@ Identify the top 5 pain points from open issues (by reactionCount and commentCou
 ## Recommended Priorities (RICE Scored)
 Apply RICE scoring to the top 10 open issues. Present as a ranked table:
 | Rank | Issue | Title | Reach | Impact | Confidence | Effort | RICE Score |
+
+RICE scores are heuristic estimates based on issue metadata and model judgment.
+Sort the table by RICE Score in descending numeric order. For ties, sort by
+severity in this order: security, crash/data-loss, reliability, user-facing UX,
+maintenance, documentation. Do not let override candidates break the numeric
+sort order; instead, flag them in the explanation and Recommended Next Actions.
+Before finalizing the response, verify that every row has a RICE Score less
+than or equal to the row above it. If not, reorder the table. Do not add notes
+claiming that non-tied rows were sorted by severity; severity sorting applies
+only to exact numeric ties.
+If an item has low RICE but high security, reliability, or trust impact, flag it
+as an override candidate in the explanation.
+
+For security-related issues, use cautious language such as "reported",
+"potential", or "requires validation" unless the issue is confirmed by
+maintainers.
 
 ## Velocity & Health Trends
 Summarize commit velocity trends and risk flags from the health check.

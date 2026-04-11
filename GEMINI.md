@@ -20,6 +20,9 @@ Issues, PRs, commits) without requiring manual data entry or external PM tools.
 6. **Honest about limitations**: Null values in tool responses indicate a metric
    could not be fetched — do not treat null as zero. Report partial data
    transparently.
+7. **Cautious risk language**: For security-related issues, use "reported",
+   "potential", or "requires validation" unless maintainers have confirmed the
+   issue.
 
 ## Available MCP Tools
 
@@ -86,6 +89,9 @@ When producing PM outputs:
 - Include trend indicators where applicable
 - Cite specific Issue/PR numbers when referencing data
 - Clearly mark any metric shown as `null` as "data unavailable" rather than 0
+- Treat RICE scores as heuristic estimates, not objective truth
+- Flag low-reach but high-severity security, reliability, data-loss, or trust
+  issues as potential priority overrides
 - End with "Recommended Next Actions" as a numbered, actionable list
 
 ## PM Frameworks Reference

@@ -23,11 +23,12 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { execFile as execFileCb } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { delimiter, join } from 'node:path';
 import process from 'node:process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
-import { realpathSync, existsSync } from 'node:fs';
-import { homedir } from 'node:os';
 
 const execFile = promisify(execFileCb);
 
@@ -321,21 +322,31 @@ export function daysAgoISO(days) {
  * @param {string[]} args
  * @returns {Promise<string>}
  */
-/**
- * Resolve the path to the gh CLI binary.
- * Falls back to common user-local install locations if not on PATH.
- */
 function resolveGhPath() {
-  const candidates = [
-    `${homedir()}/bin/gh`,
-    '/usr/local/bin/gh',
-    '/opt/homebrew/bin/gh',
-    '/usr/bin/gh',
-  ];
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) return candidate;
+  if (process.env.GH_PATH) {
+    return process.env.GH_PATH;
   }
-  return 'gh'; // last resort: rely on PATH
+
+  const home = homedir();
+  const candidates =
+    process.platform === 'win32'
+      ? [
+          join(home, 'bin', 'gh.exe'),
+          join(process.env.LOCALAPPDATA || '', 'GitHub CLI', 'gh.exe'),
+          'gh',
+        ]
+      : [
+          join(home, 'bin', 'gh'),
+          '/opt/homebrew/bin/gh',
+          '/usr/local/bin/gh',
+          '/usr/bin/gh',
+          'gh',
+        ];
+
+  return (
+    candidates.find((candidate) => candidate === 'gh' || existsSync(candidate)) ||
+    'gh'
+  );
 }
 
 const GH_PATH = resolveGhPath();
@@ -343,21 +354,21 @@ const GH_PATH = resolveGhPath();
 export async function runGh(args) {
   let stdout;
   try {
-    const home = process.env.HOME || homedir();
-    const extraPaths = [
-      `${home}/bin`,
-      '/usr/local/bin',
+    const extraPathDirs = [
+      join(homedir(), 'bin'),
       '/opt/homebrew/bin',
+      '/usr/local/bin',
       '/usr/bin',
-    ].join(':');
-    const env = {
-      ...process.env,
-      PATH: `${extraPaths}:${process.env.PATH || ''}`,
-    };
+    ];
     const result = await execFile(GH_PATH, args, {
       timeout: 30_000,
       maxBuffer: 50 * 1024 * 1024,
-      env,
+      env: {
+        ...process.env,
+        PATH: `${extraPathDirs.join(delimiter)}${delimiter}${
+          process.env.PATH || ''
+        }`,
+      },
     });
     stdout = result.stdout;
   } catch (error) {
@@ -720,11 +731,11 @@ server.registerTool(
     );
 
     // Commit velocity: GitHub Commits API, not local git.
-    // Note: gh api -f sends params as POST body; for GET endpoints the params
-    // must be embedded in the URL as a query string.
     const commitArgs = (since, until) => {
       let url = `repos/${repoSlug}/commits?since=${since}T00:00:00Z&per_page=100`;
-      if (until) url += `&until=${until}T00:00:00Z`;
+      if (until) {
+        url += `&until=${until}T00:00:00Z`;
+      }
       return ['api', url];
     };
 
@@ -816,17 +827,9 @@ server.registerTool(
 // Entry point — only when run directly; not when imported for tests
 // ---------------------------------------------------------------------------
 
-const isMain = (() => {
-  try {
-    return (
-      typeof process !== 'undefined' &&
-      Boolean(process.argv[1]) &&
-      realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
-    );
-  } catch {
-    return false;
-  }
-})();
+const isMain =
+  typeof process !== 'undefined' &&
+  process.argv[1] === fileURLToPath(import.meta.url);
 
 if (isMain) {
   const transport = new StdioServerTransport();

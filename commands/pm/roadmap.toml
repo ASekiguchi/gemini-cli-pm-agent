@@ -1,4 +1,4 @@
-description = "Generate a product roadmap — usage: /pm:roadmap owner/repo"
+description = "Generate or update a roadmap - usage: /pm:roadmap owner/repo"
 
 prompt = """
 Generate a product roadmap for the repository specified in the arguments.
@@ -11,32 +11,49 @@ Extract owner and repo from it.
 
 ## Instructions
 
+Use MCP tools directly. Do not use shell commands.
+
 Call the following MCP tools:
 1. `analyze_project_issues` with owner, repo, limit=100, state="open"
 2. `analyze_commit_velocity` with owner, repo, months=3
+3. `check_project_health` with owner, repo
 
-Then generate a Now/Next/Later roadmap:
+If the MCP tools return dataErrors, partialData=true, or an error indicating
+that GitHub data could not be fetched, stop the roadmap generation. Do not
+produce Now / Next / Later recommendations from unavailable data. Instead,
+produce an "Environment Check Required" response with the failed tool or
+metric, the exact error message if available, and setup steps for
+`gh auth status`, `gh auth login`, and retrying the command.
 
-### Roadmap — [repo name]
-
-1. Group open issues into strategic themes (core features, DX, performance, ecosystem, docs)
-2. Use reactionCount and commentCount as proxies for user demand
+Then:
+1. Group issues into strategic themes (core features, DX, performance, ecosystem, docs)
+2. Estimate effort for each theme based on issue count and complexity signals
 3. Use commit velocity to calibrate timeline estimates
+4. Produce a Now / Next / Later / Exploring roadmap
 
-#### Now (In Progress / Next Sprint)
-High-demand items with active discussion.
+Treat roadmap items as recommendations, not maintainer commitments. For
+security-related issues, use cautious language such as "reported", "potential",
+or "requires validation" unless the issue is confirmed by maintainers.
 
-#### Next (1–2 months)
+## Output Format
+
+### Roadmap - [Project Name]
+Generated: [today's date] | Velocity: [N] commits/month
+
+#### Now (In Progress)
+Items with active PRs, strong signals, or critical stability/security impact.
+
+#### Next (1-2 months)
 High-priority items with clear requirements.
 
-#### Later (3–6 months)
+#### Later (3-6 months)
 Important but needs more planning or resources.
 
 #### Exploring
-Ideas under discussion, needs community input.
+Ideas under discussion or needing community input.
 
 Present each section as a table:
-| Theme | Issue(s) | Demand signal | Effort estimate | Rationale |
+| Theme | Item | Issue(s) | Effort | Rationale |
 
-End with a note on confidence level given the data available.
+If any metrics show as null, label them "data unavailable" rather than 0.
 """

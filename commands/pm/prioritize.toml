@@ -1,4 +1,4 @@
-description = "Prioritize open issues using RICE scoring — usage: /pm:prioritize owner/repo"
+description = "Prioritize open issues using RICE scoring - usage: /pm:prioritize owner/repo"
 
 prompt = """
 Prioritize open issues for the repository specified in the arguments.
@@ -11,9 +11,18 @@ Extract owner and repo from it.
 
 ## Instructions
 
+Use MCP tools directly. Do not use shell commands.
+
 Call the following MCP tools:
 1. `analyze_project_issues` with owner, repo, limit=50, state="open"
 2. `analyze_commit_velocity` with owner, repo, months=1
+
+If the MCP tools return dataErrors, partialData=true, or an error indicating
+that GitHub data could not be fetched, stop the prioritization. Do not produce
+RICE or MoSCoW recommendations from unavailable data. Instead, produce an
+"Environment Check Required" response with the failed tool, the exact error
+message if available, and setup steps for `gh auth status`, `gh auth login`,
+and retrying the command.
 
 Then apply RICE scoring to the issues:
 
@@ -25,7 +34,24 @@ For each issue, estimate:
 - **Confidence**: Estimate confidence (100%=high, 80%=medium, 50%=low)
 - **Effort**: Person-months to implement
 
-**Score** = (Reach × Impact × Confidence) / Effort
+**Score** = (Reach x Impact x Confidence) / Effort
+
+RICE scores are heuristic estimates based on issue metadata and model judgment.
+Sort the RICE table by RICE Score in descending numeric order. For ties, sort
+by severity in this order: security, crash/data-loss, reliability, user-facing
+UX, maintenance, documentation. Do not let override candidates break the numeric
+sort order; instead, flag them in MoSCoW and Scoring Notes.
+Before finalizing the response, verify that every row has a RICE Score less
+than or equal to the row above it. If not, reorder the table. Do not add notes
+claiming that non-tied rows were sorted by severity; severity sorting applies
+only to exact numeric ties.
+Do not treat them as absolute truth. Low-reach but high-severity security,
+reliability, data-loss, or trust issues may need priority overrides; call those
+out explicitly in MoSCoW and Scoring Notes.
+
+For security-related issues, use cautious language such as "reported",
+"potential", or "requires validation" unless the issue is confirmed by
+maintainers.
 
 ## Output Format
 
@@ -36,10 +62,12 @@ For each issue, estimate:
 
 ### MoSCoW Classification
 Group the top 20 scored items into Must / Should / Could / Won't categories.
+If MoSCoW disagrees with RICE because of security or reliability severity,
+explain the override.
 
 ### Recommended Sprint Focus
-Recommend 3–5 items for the next sprint with rationale based on velocity data.
+Recommend 3-5 items for the next sprint with rationale based on velocity data.
 
 ### Scoring Notes
-Briefly explain the reasoning for the top 5 items' scores.
+Briefly explain the reasoning for the top 5 items' scores and any severity overrides.
 """

@@ -1,4 +1,4 @@
-description = "Quick project health check — usage: /pm:health owner/repo"
+description = "Quick project health check - usage: /pm:health owner/repo"
 
 prompt = """
 Run a project health check for the repository specified in the arguments.
@@ -11,7 +11,15 @@ Extract owner and repo from it.
 
 ## Instructions
 
-Call the `check_project_health` MCP tool with the extracted owner and repo.
+Use the `check_project_health` MCP tool directly. Do not use shell commands.
+
+Call `check_project_health` with the extracted owner and repo.
+
+If the tool returns dataErrors, partialData=true, or an error indicating that
+GitHub data could not be fetched, do not infer project health from unavailable
+data. Produce an "Environment Check Required" response with the failed metric,
+the exact error message if available, and setup steps for `gh auth status`,
+`gh auth login`, and retrying the command.
 
 Then produce a health scorecard:
 

@@ -30,20 +30,27 @@ implementation of
 ## Installation
 
 ```bash
-# Clone this repository
-git clone https://github.com/ASekiguchi/gemini-cli-pm-agent.git
-
-# Link the extension to Gemini CLI
-gemini extensions link /path/to/gemini-cli-pm-agent
+gemini extensions install https://github.com/ASekiguchi/gemini-cli-pm-agent
 ```
 
-The MCP server dependencies are installed automatically on first link. If you
-need to install them manually:
+For local development:
 
 ```bash
-cd /path/to/gemini-cli-pm-agent
+git clone https://github.com/ASekiguchi/gemini-cli-pm-agent.git
+cd gemini-cli-pm-agent
+npm install
+gemini extensions link .
+```
+
+If you are working from a local checkout without installing through Gemini CLI,
+install MCP server dependencies manually:
+
+```bash
 npm install
 ```
+
+For gallery discovery, the GitHub repository must be public and include the
+`gemini-cli-extension` topic.
 
 ## How it works
 
@@ -75,8 +82,9 @@ description.
 
 ### 3. Custom Commands (`commands/pm/`)
 
-TOML files that define slash commands. Each command collects data via `!{shell}`
-expressions and passes it to the LLM with a structured prompt.
+TOML files that define slash commands. Commands instruct Gemini to call the
+extension's MCP tools directly and then format the results into PM-oriented
+reports.
 
 ## Security model
 
@@ -100,6 +108,12 @@ expressions and passes it to the LLM with a structured prompt.
 - **Label categorization** uses normalized regex matching that handles common
   conventions (`kind/`, `type:`, `area/`, hyphen/underscore variants). Unusual
   label taxonomies may result in more issues landing in the `other` category.
+- **RICE scores are heuristic**: they combine issue metadata with model
+  judgment. Security, reliability, data-loss, and trust issues may need priority
+  overrides even when their raw RICE score is low.
+- **Security findings are not confirmations**: the extension should use cautious
+  wording such as "reported" or "potential" unless maintainers have confirmed
+  the issue.
 - **Search API rate limits**: `check_project_health` makes four GitHub Search
   API calls. At GitHub's default rate of 10 search requests/minute for
   authenticated users, back-to-back runs may hit rate limits.
@@ -161,7 +175,7 @@ Reference files are in `references/frameworks/`.
 ## Running tests
 
 ```bash
-node --test extensions/pm-agent/mcp-server/server.test.js
+npm test
 ```
 
 ## Architecture
@@ -191,7 +205,8 @@ pm-agent/
 
 ## Related
 
-- [Gemini CLI Extension docs](https://github.com/google-gemini/gemini-cli/tree/main/packages/cli/src/commands/extensions/examples)
+- [Gemini CLI Extension docs](https://geminicli.com/docs/extensions/)
+- [Gemini CLI Extension releasing guide](https://geminicli.com/docs/extensions/releasing/)
 - [Issue #20503](https://github.com/google-gemini/gemini-cli/issues/20503) —
   Original proposal
 

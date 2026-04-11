@@ -1,2 +1,6 @@
 node_modules/
 .DS_Store
+.env
+.env.*
+.gemini-extension-install.json
+npm-debug.log*
