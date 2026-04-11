@@ -20,6 +20,48 @@ implementation of
 | `/pm:roadmap`    | Generate a Now/Next/Later roadmap from issue and commit activity     |
 | `/pm:prioritize` | Prioritize open issues using RICE scoring + MoSCoW classification    |
 
+## Sample Output
+
+> Running `/pm:health google-gemini gemini-cli` on 2026-04-12
+
+<details>
+<summary>View full health report</summary>
+
+### Project Health: google-gemini/gemini-cli
+
+| Metric                    | Value                  |
+| ------------------------- | ---------------------- |
+| Stars                     | ~101k                  |
+| Open issues               | 48                     |
+| Closed issues (last 30d)  | 1,194                  |
+| Merged PRs (last 30d)     | 574                    |
+| Active contributors (90d) | 108                    |
+| Commit velocity           | stable (+7.8%)         |
+| help-wanted open          | 30                     |
+
+**Issue category breakdown (open)**
+
+| Category      | Count | Share |
+| ------------- | ----- | ----- |
+| area/core     | 17    | 35%   |
+| area/agent    | 13    | 27%   |
+| area/platform | 6     | 13%   |
+| area/security | 4     | 8%    |
+| other         | 8     | 17%   |
+
+**Risk flags**
+
+- ⚠️ **Triage backlog**: 38 of 48 open issues (79%) are in `status/need-triage` — no priority or area label assigned
+- ℹ️ **Contributor opportunity**: 30 `help-wanted` issues open across core, extensions, and platform areas
+
+**PM summary**
+
+The project is in a high-velocity, healthy phase. Merge and close rates (574 PRs merged, 1,194 issues closed in 30 days) indicate a well-functioning contribution pipeline. Development focus is shifting from core CLI toward agent and extension subsystems. The primary operational risk is triage backlog density: nearly 4 in 5 open issues lack priority classification, which may obscure real user pain points. Contributor opportunity is high.
+
+</details>
+
+---
+
 ## Requirements
 
 - [Gemini CLI](https://github.com/google-gemini/gemini-cli)
